@@ -1,31 +1,21 @@
-#include<stdio.h>
+#include <stdio.h>
 #include <string.h>
-#include<time.h>
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
-int cmd(void);
-int Split(char[255][255], char[], char*);
-void help(void);
-void error(char[255][255]);
-void park(void);
+#include <time.h>
+#include "packcar.h" // initialize file
+
 int main(void){
     int exit = 0;
     while (!exit){
         exit = cmd();
     }
-    // getchar();
+    // getchar(); //Don't use
 }
 
+// Function Definitions
 int cmd(void){
     char cmd[255],buf[255][255] = {" "};
     printf("Parkingcar> ");
-    // scanf("%s",&cmd);
+    // scanf("%s",&cmd);  //don't use
     fgets(cmd, sizeof(cmd), stdin);
     int i,k = Split(buf,cmd," \n");
     // debug
