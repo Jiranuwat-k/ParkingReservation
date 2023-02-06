@@ -1,0 +1,15 @@
+{
+    "version":"1.0.0",
+    "parkList":{
+        "Name":[
+            "Park1",
+            "Park2"
+        ],
+        "MaxCapasity":[
+
+        ],
+        "Locations":[
+            
+        ]
+    }
+}
