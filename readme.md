@@ -18,7 +18,7 @@
 ## Issue
 - Color rendering doesn't work properly on the command prompt.
 
-    ![command prompt.](https://github.com/jiranuwat1147//blob/main/ParkingReservation/assets/Issue_Color_CommandPrompt.jpg?raw=true)
+    ![command prompt.](assets/Issue_Color_CommandPrompt.jpg)
 ## Tools
 - Use MinGW ("Minimalist GNU for Windows")
 - Compiler
