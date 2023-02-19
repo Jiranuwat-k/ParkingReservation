@@ -1,73 +1,68 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
 #include "config.h"
-#include "packcar.h" // initialize file
-// Global Variable Declarations
-char parking [][3] = {"A0","A1","A2","A3","A4","A5","A6",
-                      "B0","B1","B2","B3","B4","B5","B6",
-                      "C0","C1","C2","C3","C4","C5","C6",
-                      "D0","D1","D2","D3","D4","D5","D6",
-                      "E0","E1","E2","E3","E4","E5","E6"
-                    };
-int empty_parking = 0;
-int use_parking   = 0;
-const int Max_Capacity = sizeof(parking)/sizeof(parking[0]);
-bool park_stage[sizeof(parking)/sizeof(parking[0])] = {0};
+#include "parking.h" // initialize file
+#include "parkingadvice.h"
+#include "auth.h"
 int main(void){
+    loadparkstatus(parking1_path,parking1_status);
+    loadparkstatus(parking2_path,parking2_status);
+    loadparkstatus(parking3_path,parking3_status);
+    loadparkstatus(parking4_path,parking4_status);
+    loadparkstatus(parking5_path,parking5_status);
     bool exit = 0;
-    // park();
+    bool auth_status = 0;
     printf(KCLS);
-    while (!exit){
+    auth_status = !authentication();
+    printf(KCLS);
+    while (!exit&&auth_status){
         printf(KNRM); // reset color 
+        // CatetoryListFloor();
         exit = cmd();
-        park_count();
     }
-    // getchar(); //not used
+    return 0;
 }
 
 // Function Definitions
 bool cmd(void){
-    char cmd[255],buf[5][125] = {" "};
-    printf("Parkingcar> ");
+    char cmd[255] = " ",buf[5][125] = {" "};
+    printf("Parking> ");
     // scanf("%s",&cmd);  //not used
     fgets(cmd, sizeof(cmd), stdin);
     int i,k = Split(buf,cmd," \n");
-    // debug
-    // for (i = 0; i < k+1; i++)
-    // {
-    //     printf("%d == |%s|\n",i,buf[i]);
-    // }
+    
     if(!strcmp(buf[0],"help")&&!strlen(buf[1])){
         help();
     }else if(!strcmp(buf[0],"--version")||!strcmp(buf[0],"--v")&&!strlen(buf[1])){
         printf(KYEL"1.0.1-alpha\n");
-    }else if(!strcmp(buf[0],"parkcar")&&!strlen(buf[1])){
-        park();
+    }else if(!strcmp(buf[0],"parking")&&!strlen(buf[1])){
+        loadparkstatus(parking1_path,parking1_status);
+        dis_parkinglayout(parking1,parking1_status,5,7);
     }else if(!strcmp(buf[0],"time")&&!strlen(buf[1])){
-        struct tm *loc_time;
-        time_t curtime = time(NULL);
-        loc_time = localtime (&curtime);
-        printf("\n%s\n", asctime (loc_time));
+        dis_time();
     }else if(!strcmp(buf[0],"reserve")&&!strlen(buf[2])){
         if (!strlen(buf[1])){
             printf(KRED"No value was entered to select.\n");
             return 0;
         }
-        if(!Reserve(buf[1])){
+        if(!Reserve(parking1, parking1_status,parking1_Max_Capacity,buf[1])){
             printf(KGRN"Reserve Success\n");
-            park();
+            writeparkstage(parking1_path,parking1_status,parking1_Max_Capacity);
+            dis_parkinglayout(parking1,parking1_status,5,7);
         }
     }else if(!strcmp(buf[0],"cancel")&&!strlen(buf[2])){
         if (!strlen(buf[1])){
             printf(KRED"No value was entered to select.\n");
             return 0;
         }
-        if(!Cancel(buf[1])){
+        if(!Cancel(parking1, parking1_status, parking1_Max_Capacity, buf[1])){
             printf(KGRN"Cancel Success\n");
-            park();
+            writeparkstage(parking1_path,parking1_status,parking1_Max_Capacity);
+            dis_parkinglayout(parking1,parking1_status,5,7);
         }
     }else if(!strcmp(buf[0]," ")){
         return 0;
@@ -78,7 +73,7 @@ bool cmd(void){
     }else{
         error(buf);
     }
-    return 0;
+    return 0; 
 }
 bool Split(char buf[5][125], char str[],char* delim){
     char* string = str;
@@ -86,7 +81,6 @@ bool Split(char buf[5][125], char str[],char* delim){
     char * token = strtok(string,delim);
     int i = 0;
     while( token != NULL ) {
-        //printf( " %s\n", token ); //Debug printing each token
         strcpy(buf[i],token);
         token = strtok(NULL,delim);
         i++;
@@ -124,72 +118,253 @@ void error(char buf[5][125]){
     }
     printf("\n");
 }
-void park(void){
-    int i,j;
+void dis_parkinglayout(char parking[][3], bool status[],int row, int column){
+    int i,j,parkinguse;
+    int size = row*column;
+    parkinguse = park_count(status,size);
+    printf(KNRM"Parking use = %d | Parking Emtry = %d\n",parkinguse,size-parkinguse);
     printf(KWHT"\n\x1B[48;5;202m\t\t             Parkcar Map            \x1B[0m\n\n\t\t");
-    for(i = 0; i<Max_Capacity;i++){
+    for(i = 0; i<size;i++){
         printf(KCYN"| ");
-        printf((park_stage[i] == 0) ? KGRN : KRED);
+        printf((status[i] == 0) ? KGRN : KRED);
         printf("%s ",parking[i]);
-        if(!((i+1)%7)){
+        if(!((i+1)%column)){
             printf(KCYN"|\n\n\t\t");
         }
     }
     printf("\n");
 }
-bool Reserve(char* s_index){
+bool Reserve(char parking[][3], bool p_status[], int size, char* s_index){
     if(!strcmp(s_index,"all")||!strcmp(s_index,"-a")){
-        setall(1);
+        setall(p_status,size,1);
         return 0;
     }
-    int index = findIndex(s_index);
+    int index = findIndex(parking, size, s_index);
     if(index != -1){
-        if(park_stage[index]){
+        if(p_status[index]){
             printf(KRED"Reserve Fall\n");
             return 1;
         }
-        park_stage[index] = 1;
+        p_status[index] = 1;
         return 0;
     }
     printf(KRED"Reserve Out of Range\n");
     return 1;
 }
-bool Cancel(char* s_index){
+bool Cancel(char parking[][3], bool p_status[], int size, char* s_index){
     if(!strcmp(s_index,"all")||!strcmp(s_index,"-a")){
-        setall(0);
+        setall(p_status,size,0);
         return 0;
     }
-    int index = findIndex(s_index);
+    int index = findIndex(parking, size, s_index);
     if(index != -1){
-        if(!park_stage[index]){
+        if(!p_status[index]){
             printf(KRED"Cancel Fall\n");
             return 1;
         }
-        park_stage[index] = 0;
+        p_status[index] = 0;
         return 0;
     }
     printf(KRED"Cancel outofrange\n");
     return 1;
 }
-int findIndex(char* text){
+int findIndex(char dataset[][3], int size, char* text){
     int i;
-    for ( i = 0; i < Max_Capacity; i++)
+    for ( i = 0; i < size; i++)
     {
-        if(!strcmp(parking[i],text)){
+        if(!strcmp(dataset[i],text)){
             return i;
         }
     }
     return -1;
-}
-void setall(bool stage){
+} 
+void setall(bool p_status[], int size, bool set){
     int i;
-    for (i = 0; i < Max_Capacity; i++)
+    for (i = 0; i < size; i++)
     {
-        park_stage[i] = stage;
+        p_status[i] = set;
     }
 }
-void park_count(void){
+int park_count(bool p_status[], int size){
+    int i,count_use = 0;
+    for (i = 0; i < size; i++)
+    {
+        if(p_status[i]){
+            count_use += 1;
+        }
+    }
+    return count_use;
+}
+void dis_time(void){
+    struct tm *loc_time;
+    time_t curtime = time(NULL);
+    loc_time = localtime (&curtime);
+    printf("\n%s\n", asctime (loc_time));
+}
+bool loadparkstatus(char *path, bool buf[]){
+    int i, max = 0;
+    FILE *stream;
+    // use appropriate location if you are using MacOS or Linux
+    stream = fopen(path,"r");
+    if(stream == NULL)
+    {
+        writeparkstage(path,buf,-1); // set size -1 touse MaxSize_Parking_File 
+        return 1;            
+    }
+    
+    fscanf(stream,"Max_Capacity = %d",&max);
+    for (i = 0; i < max; i++)
+    {
+        fscanf(stream,"%d ",&buf[i]);
+    }
+    fclose(stream);
+    return 0;
+}
+bool writeparkstage(char *path, bool update[], int max){
+    int i;
+    if (max == -1){
+        max = MaxSize_Parking_File;
+    }
+    FILE *stream;
+    stream = fopen(path,"w");
+    if(stream == NULL)
+    {
+        printf(KRED"File Write Error!\n");    
+        return 1;            
+    }
+    fprintf(stream,"Max_Capacity = %d\n",max);
+    for ( i = 0; i < max; i++)
+    {
+        fprintf(stream,"%d ",update[i]);
+    }
+    fclose(stream);
+    return 0;
+}
 
+void CatetoryList(){
+    int i;
+    printf(KMAG"\t%-32s%s\n\n","Catetory","ID"KNRM);
+    for (i = 0; i < 7; i++)
+    {
+        printf("\t%-32s%d\n",catetory[i],i+1);
+    }
+}
+void CatetoryListFloor(){
+    int i;
+    printf(KMAG"\n\tFloor 1\n");
+    for (i = 0; i < LEVEL1.maxcatetory; i++){
+        printf(KNRM"\t\t%-32s\n",LEVEL1.catetory[i]);
+    }
+    printf(KMAG"\n\tFloor 2\n");
+    for (i = 0; i < LEVEL2.maxcatetory; i++){
+        printf(KNRM"\t\t%-32s\n",LEVEL2.catetory[i]);
+    }
+    printf(KMAG"\n\tFloor 3\n");
+    for (i = 0; i < LEVEL3.maxcatetory; i++){
+        printf(KNRM"\t\t%-32s\n",LEVEL3.catetory[i]);
+    }
+    printf(KMAG"\n\tFloor 4\n");
+    for (i = 0; i < LEVEL4.maxcatetory; i++){
+        printf(KNRM"\t\t%-32s\n",LEVEL4.catetory[i]);
+    }
+}
+int Register(char* username, char* password, char gender){
+        FILE* stream = fopen(auth_user_path,"a");
+        if (stream == NULL){
+            return -1;
+        }
+        // srand(time(NULL));
+        if(UsernameIsuse(username)){
+            srand(time(NULL));
+            char uid[14];
+            sprintf(uid,"%05d%05d",rand(),rand());
+            fprintf(stream,USER_FORMAT_OUT,uid,username,password,gender);
+        }else{
+            printf(KRED"Username is use.\n"KNRM);
+            return 1;
+        }
+        fclose(stream);
+        return 0;
+}
+int Login(char* username, char* password){
+    FILE* stream = fopen(auth_user_path,"r");
+    if (stream == NULL)
+    {
+        return -1;
+    }
+    char buffer[200];
+    fgets(buffer,200,stream);
+    while (!feof(stream))
+    {
+        struct user data;
+        sscanf(buffer,USER_FORMAT_IN,data.uid,data.username,data.password,&data.gender);
+        if(!strncmp(data.username,username,50)&&!strncmp(data.password,password,50)){
+            user = data;
+            return 0;
+        }
+        fgets(buffer,200,stream);
+    }
+    fclose(stream);
+    printf(KRED"No Userinsystem"KNRM);
+    return 1;
+}
+bool UsernameIsuse(char* username){
+    FILE* stream = fopen(auth_user_path,"r");
+    if (stream == NULL)
+    {
+        return 1;
+    }
+    char buffer[200];
+    fgets(buffer,200,stream);
+    while (!feof(stream))
+    {
+        struct user data;
+        sscanf(buffer,USER_FORMAT_IN,data.uid,data.username,data.password,&data.gender);
+        if(!strncmp(data.username,username,50)){
+            return 0;
+        }
+        fgets(buffer,200,stream);
+    }
+    fclose(stream);
+    return 1;
+}
+bool authentication(){
+    char selected = ' ',gender;
+    char username[50],password[50];
+    printf(KCYN"\n\n\t\tWelcome to the parking reservation and guide system.\n\n");
+    while(1){
+        printf(KMAG"\t\tYou want to login / register (L/R) : "KYEL);
+        scanf("%c",&selected);
+        if ('l' == tolower(selected))
+        {
+            while (1){
+                printf(KMAG"\t\tUsername : "KYEL);
+                scanf("%s",&username);
+                printf(KMAG"\t\tPassword : "KYEL);
+                scanf("%s",&password);
+                if(!Login(username, password)){
+                    printf(KGRN"\t\tLogin Success.\n");
+                    printf(KNRM"\t\tHello %s",user.username);
+                    return 0;
+                }
+            }
+        }else if('r' == tolower(selected)){
+            while (1)
+            {
+                printf(KMAG"\t\tUsername : "KYEL);
+                scanf("%s",&username);
+                printf(KMAG"\t\tPassword : "KYEL);
+                scanf("%s",&password);
+                printf(KMAG"\t\tGender Male/Female (M/F) : "KYEL);
+                scanf(" %c",&gender);
+                if(!Register(username, password, gender)){
+                    printf(KGRN"\t\tRegister Success.\n");
+                    break;
+                }
+            }
+            
+        }
+    }
 }
 // function convert string to Uppercase String ()
 // void strtoupper(char string[]){

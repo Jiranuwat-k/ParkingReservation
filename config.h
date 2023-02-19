@@ -10,6 +10,14 @@
     #define KCYN  "\x1B[36m"
     #define KWHT  "\x1B[37m"
     #define KCLS  "\x1B[1J\x1B[H"
+    // app
+    int MaxSize_Parking_File = 35;  // use in function file read/write
+    char* parking1_path = "appData/stage/parking1.txt";
+    char* parking2_path = "appData/stage/parking2.txt";
+    char* parking3_path = "appData/stage/parking3.txt";
+    char* parking4_path = "appData/stage/parking4.txt";
+    char* parking5_path = "appData/stage/parking5.txt";
+    char* auth_user_path = "appData/auth/user.txt";
 #endif
 // Enable CMD ANSI Escape
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING

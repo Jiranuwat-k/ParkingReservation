@@ -2,7 +2,9 @@
 - [x] Receive orders from users
 - [x] Reserve parking
 - [x] Cancellation of parking
-- [ ] Storage
+- [x] Storage
+- [x] Login/Register
+- [ ] Advice Parking
 ## Reference
 - ANSI Escape
   - [Document ](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)
@@ -18,7 +20,7 @@
 ## Issue
 - Color rendering doesn't work properly on the command prompt.
 
-    ![command prompt.](https://github.com/jiranuwat1147//blob/main/ParkingReservation/assets/Issue_Color_CommandPrompt.jpg?raw=true)
+    ![command prompt.](assets/Issue_Color_CommandPrompt.jpg)
 ## Tools
 - Use MinGW ("Minimalist GNU for Windows")
 - Compiler
@@ -26,4 +28,4 @@
 ## License
 None (Open-Source)
 #### [IEE@KMUTNB](https://iee.eng.kmutnb.ac.th/iee/)
-##### [Instrumentation and Electronics Engineering](https://iee.eng.kmutnb.ac.th/web/)
+##### Industrial Electrical and Energy Engineering
