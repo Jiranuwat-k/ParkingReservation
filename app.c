@@ -18,6 +18,7 @@ int main(void){
     bool auth_status = 0;
     printf(KCLS);
     auth_status = !authentication();
+    // delay(500);
     printf(KCLS);
     while (!exit&&auth_status){
         printf(KNRM); // reset color 
@@ -40,8 +41,49 @@ bool cmd(void){
     }else if(!strcmp(buf[0],"--version")||!strcmp(buf[0],"--v")&&!strlen(buf[1])){
         printf(KYEL"1.0.1-alpha\n");
     }else if(!strcmp(buf[0],"parking")&&!strlen(buf[1])){
-        loadparkstatus(parking1_path,parking1_status);
-        dis_parkinglayout(parking1,parking1_status,5,7);
+        int id,ex = 1;
+        printf(KCYN"\n\t\tParking\t\t\tID\n\n");
+        printf("\t\tMotorcycle park\t\t1\n");
+        printf("\t\tCarpark 1\t\t2\n");
+        printf("\t\tCarpark 2\t\t3\n");
+        printf("\t\tCarpark 3\t\t4\n");
+        printf("\t\tlady park\t\t5\n");
+        while (ex)
+        {
+            printf(KMAG"\t\tSelect please parking by ID : "KYEL);
+            scanf("%d",&id);
+            switch (id)
+            {
+            case 1:
+                loadparkstatus(parking1_path,parking1_status);
+                dis_parkinglayout(parking1,parking1_status,5,7);
+                ex = 0;
+                break;
+            case 2:
+                loadparkstatus(parking2_path,parking2_status);
+                dis_parkinglayout(parking2,parking2_status,5,7);
+                ex = 0;
+                break;
+            case 3:
+                loadparkstatus(parking3_path,parking3_status);
+                dis_parkinglayout(parking3,parking3_status,5,7);
+                ex = 0;
+                break;
+            case 4:
+                loadparkstatus(parking4_path,parking4_status);
+                dis_parkinglayout(parking4,parking4_status,5,7);
+                ex = 0;
+                break;
+            case 5:
+                loadparkstatus(parking5_path,parking5_status);
+                dis_parkinglayout(parking5,parking5_status,5,7);
+                ex = 0;
+                break;
+            default:
+                printf(KRED"\t\tCan't find your ID.\n");
+                break;
+            }
+        }
     }else if(!strcmp(buf[0],"time")&&!strlen(buf[1])){
         dis_time();
     }else if(!strcmp(buf[0],"reserve")&&!strlen(buf[2])){
@@ -123,7 +165,7 @@ void dis_parkinglayout(char parking[][3], bool status[],int row, int column){
     int size = row*column;
     parkinguse = park_count(status,size);
     printf(KNRM"Parking use = %d | Parking Emtry = %d\n",parkinguse,size-parkinguse);
-    printf(KWHT"\n\x1B[48;5;202m\t\t             Parkcar Map            \x1B[0m\n\n\t\t");
+    printf(KWHT"\n\x1B[48;5;202m\t\t             Parking Map            \x1B[0m\n\n\t\t");
     for(i = 0; i<size;i++){
         printf(KCYN"| ");
         printf((status[i] == 0) ? KGRN : KRED);
@@ -334,7 +376,7 @@ bool authentication(){
     printf(KCYN"\n\n\t\tWelcome to the parking reservation and guide system.\n\n");
     while(1){
         printf(KMAG"\t\tYou want to login / register (L/R) : "KYEL);
-        scanf("%c",&selected);
+        scanf(" %c",&selected);
         if ('l' == tolower(selected))
         {
             while (1){
@@ -344,7 +386,7 @@ bool authentication(){
                 scanf("%s",&password);
                 if(!Login(username, password)){
                     printf(KGRN"\t\tLogin Success.\n");
-                    printf(KNRM"\t\tHello %s",user.username);
+                    printf(KNRM"\t\tHello %s\n",user.username);
                     return 0;
                 }
             }
@@ -365,6 +407,18 @@ bool authentication(){
             
         }
     }
+}
+void delay(int number_of_seconds)
+{
+    // Converting time into milli_seconds
+    int milli_seconds = 1000 * number_of_seconds;
+ 
+    // Storing start time
+    clock_t start_time = clock();
+ 
+    // looping till required time is not achieved
+    while (clock() < start_time + milli_seconds)
+        ;
 }
 // function convert string to Uppercase String ()
 // void strtoupper(char string[]){

@@ -61,4 +61,5 @@
     int Register(char*, char*, char);
     bool UsernameIsuse(char*);
     bool authentication();
+    void delay(int);
 #endif
