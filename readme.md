@@ -28,4 +28,4 @@
 ## License
 None (Open-Source)
 #### [IEE@KMUTNB](https://iee.eng.kmutnb.ac.th/iee/)
-##### Industrial Electrical and Energy Engineering
+##### [Instrumentation and Electronics Engineering](https://iee.eng.kmutnb.ac.th/web/)
