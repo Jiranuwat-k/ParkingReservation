@@ -9,6 +9,9 @@
 #include "parkingadvice.h"
 #include "auth.h"
 bool auth_status = 0;
+bool rights = 0;
+int reserve_id;
+char* reserve_spot;
 int main(void){
     loadparkstatus(parking1_path,parking1_status);
     loadparkstatus(parking2_path,parking2_status);
@@ -18,7 +21,7 @@ int main(void){
     bool exit = 0;
     printf(KCLS);
     auth_status = !authentication();
-    delay(2);
+    delay(1);
     printf(KCLS);
     while (!exit&&auth_status){
         printf(KNRM); // reset color 
@@ -50,6 +53,10 @@ bool cmd(void){
     }else if(!strcmp(buf[0],"time")&&!strlen(buf[1])){
         dis_time();
     }else if(!strcmp(buf[0],"reserve")&&!strlen(buf[1])){
+        if (rights){
+            printf(KRED"You cannot make a reservation because you have already exercised your reservation rights.\n");
+            return 0;
+        }
         int id;
         char spot[3];
         dis_parkinglist();
@@ -58,13 +65,13 @@ bool cmd(void){
         scanf("%s",spot);
         Setparkingbyid(id,spot,1);
     }else if(!strcmp(buf[0],"cancel")&&!strlen(buf[1])){
-        int id;
-        char spot[3];
-        dis_parkinglist();
-        id = getparkingid();
-        printf(KMAG"\t\tPlease select a parking spot to Cancel : "KYEL);
-        scanf("%s",spot);
-        Setparkingbyid(id,spot,0);
+        // int id;
+        // char spot[3];
+        // dis_parkinglist();
+        // id = getparkingid();
+        // printf(KMAG"\t\tPlease select a parking spot to Cancel : "KYEL);
+        // scanf("%s",spot);
+        Setparkingbyid(reserve_id,reserve_spot,0);
     }else if(!strcmp(buf[0],"advice")&&!strlen(buf[1])){
         char select = ' ';
         CatetoryList();
@@ -72,6 +79,10 @@ bool cmd(void){
         printf(KNRM"\tWould you like to reserve a parking spot? (Y/N) : "KYEL);
         scanf(" %c",&select);
         if('y' == tolower(select)){
+            if (rights){
+                printf(KRED"You cannot make a reservation because you have already exercised your reservation rights.\n");
+                return 0;
+            }
             int id;
             char spot[3];
             dis_parkinglist();
@@ -86,6 +97,10 @@ bool cmd(void){
         auth_status = !authentication();
         delay(1);
         printf(KCLS);
+    }else if(!strcmp(buf[0],"catetory")&&!strlen(buf[1])){
+        CatetoryList();
+    }else if(!strcmp(buf[0],"catetoryfloor")&&!strlen(buf[1])){
+        CatetoryListFloor();
     }else if(!strcmp(buf[0]," ")){
         return 0;
     }else if(!strcmp(buf[0],"cls")||!strcmp(buf[0],"clear")&&!strlen(buf[1])){
@@ -114,17 +129,13 @@ void help(void){
     printf("\t\t\tHelp Program\n\n");
     printf("\thelp          \t\t: Get-Help name of a function or operable program.\n");
     printf("\t--v, --version\t\t: Get Program Version.\n");
-    printf("\tparkcar       \t\t: Get List Packcar.\n");
-    printf("\treserve       \t\t: Reserve Packcar.\n");
-    printf("\t  Usage : reserve [options]\n");
-    printf("\t  Options:\n");
-    printf("\t  -a, all     \t\t: Reserve All ParkCar.\n");
-    printf("\t  {ID}        \t\t: Reserve ID in ParkCar. (Ex. reserve A0)\n");
-    printf("\tcancel        \t\t: Reserve Packcar.\n");
-    printf("\t  Usage : cancel [options]\n");
-    printf("\t  Options:\n");
-    printf("\t  -a, all     \t\t: Cancel reserve All ParkCar.\n");
-    printf("\t  {ID}        \t\t: Cancel reserve ID in ParkCar. (Ex. cancel A0)\n");
+    printf("\tparking       \t\t: Get List Packing.\n");
+    printf("\treserve       \t\t: Reserve packing.\n");
+    printf("\tcancel        \t\t: Cancel reservation packing.\n");
+    printf("\tadvice        \t\t: Recommended parking.\n");
+    printf("\tcatetory        \t: Show all categories.\n");
+    printf("\tcatetoryfloor        \t: Show categories on each floor.\n");
+    printf("\tlogout        \t\t: Logout.\n");
     printf("\texit          \t\t: Exit Program.\n");
     printf("\tcls, clear    \t\t: Clear Program Display.\n");
     printf("\ttime          \t\t: Get Now Date-Time.\n\n");
@@ -157,7 +168,7 @@ void dis_parkinglayout(char parking[][3], bool status[],int row, int column){
     printf(KBLU"Parking use = %s%d%s   Parking Emtry = %s%d\n",KYEL,parkinguse,KBLU,KYEL,size-parkinguse);
 }
 bool Reserve(char parking[][3], bool p_status[], int size, char* s_index){
-    if(!strcmp(s_index,"all")||!strcmp(s_index,"-a")){
+    if((!strcmp(s_index,"all")||!strcmp(s_index,"-a"))&&!strncmp(user.username,"Admin",50)){
         setall(p_status,size,1);
         return 0;
     }
@@ -174,7 +185,7 @@ bool Reserve(char parking[][3], bool p_status[], int size, char* s_index){
     return 1;
 }
 bool Cancel(char parking[][3], bool p_status[], int size, char* s_index){
-    if(!strcmp(s_index,"all")||!strcmp(s_index,"-a")){
+    if((!strcmp(s_index,"all")||!strcmp(s_index,"-a"))&&!strncmp(user.username,"Admin",50)){
         setall(p_status,size,0);
         return 0;
     }
@@ -337,7 +348,7 @@ int Login(char* username, char* password){
         fgets(buffer,200,stream);
     }
     fclose(stream);
-    printf(KRED"\t\tNo Userinsystem\n"KNRM);
+    printf(KRED"\t\tThe username or password is incorrect or the user does not exist in the system.\n"KNRM);
     return 1;
 }
 bool UsernameIsuse(char* username){
@@ -379,6 +390,7 @@ bool authentication(){
                     printf(KNRM"\t\tHello %s\n",user.username);
                     return 0;
                 }
+                break;
             }
         }else if('r' == tolower(selected)){
             while (1)
@@ -411,6 +423,11 @@ int getparkingid(){
     while (ex){
         printf(KMAG"\t\tPlease select parking by ID : "KYEL);
         scanf("%d",&id);
+        if (id == 5 && tolower(user.gender) == 'm')
+        {
+            printf(KRED"\t\tYou can't make a reservation because it's a lady only parking.\n");
+            continue;
+        }
         switch (id){
             case 1:
                 loadparkstatus(parking1_path,parking1_status);
@@ -452,6 +469,9 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Reserve Success\n");
                     writeparkstage(parking1_path,parking1_status,parking1_Max_Capacity);
                     dis_parkinglayout(parking1,parking1_status,5,7);
+                    rights = 1;
+                    reserve_id = id;
+                    reserve_spot = spot;
                 }
                 break;
             case 2:
@@ -459,6 +479,9 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Reserve Success\n");
                     writeparkstage(parking2_path,parking2_status,parking2_Max_Capacity);
                     dis_parkinglayout(parking2,parking2_status,5,7);
+                    rights = 1;
+                    reserve_id = id;
+                    reserve_spot = spot;
                 }
                 break;
             case 3:
@@ -466,6 +489,9 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Reserve Success\n");
                     writeparkstage(parking3_path,parking3_status,parking3_Max_Capacity);
                     dis_parkinglayout(parking3,parking3_status,5,7);
+                    rights = 1;
+                    reserve_id = id;
+                    reserve_spot = spot;
                 }
                 break;
             case 4:
@@ -473,6 +499,9 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Reserve Success\n");
                     writeparkstage(parking4_path,parking4_status,parking4_Max_Capacity);
                     dis_parkinglayout(parking4,parking4_status,5,7);
+                    rights = 1;
+                    reserve_id = id;
+                    reserve_spot = spot;
                 }
                 break;
             case 5:
@@ -480,6 +509,9 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Reserve Success\n");
                     writeparkstage(parking5_path,parking5_status,parking5_Max_Capacity);
                     dis_parkinglayout(parking5,parking5_status,5,7);
+                    rights = 1;
+                    reserve_id = id;
+                    reserve_spot = spot;
                 }
                 break;
         }
@@ -490,6 +522,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Cancel Success\n");
                     writeparkstage(parking1_path,parking1_status,parking1_Max_Capacity);
                     dis_parkinglayout(parking1,parking1_status,5,7);
+                    rights = 0;
                 }
                 break;
             case 2:
@@ -497,6 +530,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Cancel Success\n");
                     writeparkstage(parking2_path,parking2_status,parking2_Max_Capacity);
                     dis_parkinglayout(parking2,parking2_status,5,7);
+                    rights = 0;
                 }
                 break;
             case 3:
@@ -504,6 +538,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Cancel Success\n");
                     writeparkstage(parking3_path,parking3_status,parking3_Max_Capacity);
                     dis_parkinglayout(parking3,parking3_status,5,7);
+                    rights = 0;
                 }
                 break;
             case 4:
@@ -511,6 +546,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Cancel Success\n");
                     writeparkstage(parking4_path,parking4_status,parking4_Max_Capacity);
                     dis_parkinglayout(parking4,parking4_status,5,7);
+                    rights = 0;
                 }
                 break;
             case 5:
@@ -518,6 +554,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     printf(KGRN"Cancel Success\n");
                     writeparkstage(parking5_path,parking5_status,parking5_Max_Capacity);
                     dis_parkinglayout(parking5,parking5_status,5,7);
+                    rights = 0;
                 }
                 break;
         }
@@ -583,6 +620,9 @@ void delay(int number_of_seconds)
     // looping till required time is not achieved
     while (clock() < start_time + milli_seconds)
         ;
+}
+void autocheckout(){
+
 }
 // function convert string to Uppercase String ()
 // void strtoupper(char string[]){

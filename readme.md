@@ -4,7 +4,7 @@
 - [x] Cancellation of parking
 - [x] Storage
 - [x] Login/Register
-- [ ] Advice Parking
+- [x] Advice Parking
 ## Reference
 - ANSI Escape
   - [Document ](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)
