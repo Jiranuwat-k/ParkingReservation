@@ -65,6 +65,9 @@ bool cmd(void){
         scanf("%s",spot);
         Setparkingbyid(id,spot,1);
     }else if(!strcmp(buf[0],"cancel")&&!strlen(buf[1])){
+        // if(){
+
+        // }
         // int id;
         // char spot[3];
         // dis_parkinglist();
