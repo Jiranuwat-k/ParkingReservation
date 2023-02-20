@@ -31,6 +31,13 @@
                           "D0","D1","D2","D3","D4","D5","D6",
                           "E0","E1","E2","E3","E4","E5","E6"
                          }; //lady park
+    char parkingname [][256] = {
+                            "Motorcycle park",
+                            "Carpark 1",
+                            "Carpark 2",
+                            "Carpark 3",
+                            "lady park"
+    };
     const int parking1_Max_Capacity = sizeof(parking1)/sizeof(parking1[0]);
     bool parking1_status[sizeof(parking1)/sizeof(parking1[0])] = {0};
     const int parking2_Max_Capacity = sizeof(parking2)/sizeof(parking2[0]);
@@ -50,6 +57,7 @@
     bool Reserve(char[][3], bool[], int, char*);
     bool Cancel (char[][3], bool[], int, char*);
     int  findIndex (char[][3], int, char*);
+    int  findIndex2 (char[][256], int, char*);
     void setall (bool[], int, bool);
     int  park_count (bool[], int);
     bool loadparkstatus (char*, bool[]);
@@ -62,4 +70,8 @@
     bool UsernameIsuse(char*);
     bool authentication();
     void delay(int);
+    void dis_parkinglist();
+    int getparkingid();
+    void Setparkingbyid(int, char*, int);
+    void Advice();
 #endif

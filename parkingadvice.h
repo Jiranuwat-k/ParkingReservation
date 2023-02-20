@@ -52,7 +52,7 @@
                             .maxcatetory = 4,
                             .catetory = {
                                 "BANK & INSURAN",
-                                "CAFF’& RESTAURANT",
+                                "CAFE & RESTAURANT",
                                 "BOOK, STATIONERY & LIFESTYLE",
                                 "SERVICES & OTHER"
                             },
