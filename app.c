@@ -10,8 +10,8 @@
 #include "auth.h"
 bool auth_status = 0;
 bool rights = 0;
-int reserve_id;
-char* reserve_spot;
+int reserve_id = 0;
+char reserve_spot[3] = " ";
 int main(void){
     loadparkstatus(parking1_path,parking1_status);
     loadparkstatus(parking2_path,parking2_status);
@@ -64,16 +64,17 @@ bool cmd(void){
         scanf("%s",spot);
         Setparkingbyid(id,spot,1);
     }else if(!strcmp(buf[0],"cancel")&&!strlen(buf[1])){
-        // if(){
-
-        // }
-        // int id;
-        // char spot[3];
-        // dis_parkinglist();
-        // id = getparkingid();
-        // printf(KMAG"\t\tPlease select a parking spot to Cancel : "KYEL);
-        // scanf("%s",spot);
-        Setparkingbyid(reserve_id,reserve_spot,0);
+        if(!strncmp(user.username,"Admin",50)){
+            int id;
+            char spot[3];
+            dis_parkinglist();
+            id = getparkingid();
+            printf(KMAG"\t\tPlease select a parking spot to Cancel : "KYEL);
+            scanf("%s",spot);
+            Setparkingbyid(id,spot,0);
+        }else{
+            Setparkingbyid(reserve_id,reserve_spot,0);
+        }
     }else if(!strcmp(buf[0],"advice")&&!strlen(buf[1])){
         char select = ' ';
         CatetoryList();
@@ -318,7 +319,6 @@ int Register(char* username, char* password, char gender){
         if (stream == NULL){
             return -1;
         }
-        // srand(time(NULL));
         if(UsernameIsuse(username)){
             srand(time(NULL));
             char uid[14];
@@ -473,7 +473,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     dis_parkinglayout(parking1,parking1_status,5,7);
                     rights = 1;
                     reserve_id = id;
-                    reserve_spot = spot;
+                    strcpy(reserve_spot,spot);
                 }
                 break;
             case 2:
@@ -483,7 +483,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     dis_parkinglayout(parking2,parking2_status,5,7);
                     rights = 1;
                     reserve_id = id;
-                    reserve_spot = spot;
+                    strcpy(reserve_spot,spot);
                 }
                 break;
             case 3:
@@ -493,7 +493,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     dis_parkinglayout(parking3,parking3_status,5,7);
                     rights = 1;
                     reserve_id = id;
-                    reserve_spot = spot;
+                    strcpy(reserve_spot,spot);
                 }
                 break;
             case 4:
@@ -502,8 +502,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     writeparkstage(parking4_path,parking4_status,parking4_Max_Capacity);
                     dis_parkinglayout(parking4,parking4_status,5,7);
                     rights = 1;
-                    reserve_id = id;
-                    reserve_spot = spot;
+                    strcpy(reserve_spot,spot);
                 }
                 break;
             case 5:
@@ -512,8 +511,7 @@ void Setparkingbyid(int id, char* spot, int status){
                     writeparkstage(parking5_path,parking5_status,parking5_Max_Capacity);
                     dis_parkinglayout(parking5,parking5_status,5,7);
                     rights = 1;
-                    reserve_id = id;
-                    reserve_spot = spot;
+                    strcpy(reserve_spot,spot);
                 }
                 break;
         }
