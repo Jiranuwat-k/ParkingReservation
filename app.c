@@ -25,7 +25,6 @@ int main(void){
     printf(KCLS);
     while (!exit&&auth_status){
         printf(KNRM); // reset color 
-        // CatetoryListFloor();
         exit = cmd();
     }
     return 0;
@@ -621,8 +620,7 @@ void delay(int number_of_seconds)
     clock_t start_time = clock();
  
     // looping till required time is not achieved
-    while (clock() < start_time + milli_seconds)
-        ;
+    while (clock() < start_time + milli_seconds);
 }
 void autocheckout(){
 
