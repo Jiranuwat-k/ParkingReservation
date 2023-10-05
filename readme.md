@@ -26,6 +26,6 @@
 - Compiler
   - mingw32-gcc-g++-bin  version 2.9.0-2
 ## License
-None (Open-Source)
+None
 #### [IEE@KMUTNB](https://iee.eng.kmutnb.ac.th/iee/)
-##### [Instrumentation and Electronics Engineering](https://iee.eng.kmutnb.ac.th/web/)
+##### [Instrumentation and Electronics Engineering](https://iee.eng.kmutnb.ac.th/iee)
